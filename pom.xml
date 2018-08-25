@@ -8,7 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
-    <name>demo</name>
+    <name>docker-spring-boot-demo</name>
     <description>Demo project for Spring Boot</description>
 
     <parent>
@@ -19,6 +19,7 @@
     </parent>
 
     <properties>
+        <docker.image.prefix>springboot</docker.image.prefix>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
@@ -43,7 +44,37 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.1.1</version>
+                <configuration>
+                    <!--覆盖相同标签镜像-->
+                    <forceTags>true</forceTags>
+                    <!--指定镜像名称 仓库/镜像名:标签-->
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <!--指定基础镜像，相当于dockerFile中的FROM<image> -->
+                    <baseImage>lwieske/java-8</baseImage>
+                    <!-- 容器启动执行的命令，相当于dockerFile的ENTRYPOINT -->
+                    <entryPoint>["java","-jar","/${project.build.finalName}.jar"]</entryPoint>
+                    <!--<dockerDirectory>src/main/docker</dockerDirectory>-->
+                    <dockerHost>http://119.29.145.243:5555</dockerHost>
+                    <resources>
+                        <!-- 指定资源文件 -->
+                        <resource>
+                            <!-- 指定要复制的目录路径，这里是当前目录 -->
+                            <targetPath>/</targetPath>
+                            <!-- 指定要复制的根目录，这里是target目录 -->
+                            <directory>${project.build.directory}</directory>
+                            <!-- 指定需要拷贝的文件，这里指最后生成的jar包 -->
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
         </plugins>
+        <finalName>demo</finalName>
     </build>
 
 
